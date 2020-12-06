@@ -30,7 +30,7 @@ These are random explorations of core Clojure - both in itself as well as from J
 
 #+end_src
 
-#+begin_src clojure
+#+begin_src clojure :exports both
 ;; clojure.core is HUGE.
 (count (dir-fn 'clojure.core))
 #+end_src
@@ -41,9 +41,9 @@ These are random explorations of core Clojure - both in itself as well as from J
 
 #+end_src
 
-Protocols present themselves as a map when printed
+Protocols present themselves as a map when printed. It's easy to see its implementations in the `:impls` slot.
 
-#+begin_src clojure
+#+begin_src clojure :exports both
 ;; Protocols. Picking one arbitrarily
 Inst
 #+end_src
@@ -63,8 +63,9 @@ Inst
 
 #+end_src
 
-How many public vars start with "with-"?
-#+begin_src clojure
+More general explorations of the `clojure.core` namespace.
+For example, how many public vars start with "with-"?
+#+begin_src clojure :exports both
 ;; What with-* functions exist? 10+!
 (->> 'clojure.core
   dir-fn
@@ -88,8 +89,8 @@ How many public vars start with "with-"?
 
 #+end_src
 
-Let's list only the macros
-#+begin_src clojure
+Let's list only the macros. This is a _huge_ list, of course.
+#+begin_src clojure :exports both
 ;; List the macros
 (->> 'clojure.core
   dir-fn
@@ -182,14 +183,34 @@ Let's list only the macros
 
 #+end_src
 
-#+begin_src clojure
+The _var_s hold meta information, from which we can glean much useful information.
+The _:name_ slot carries the _Symbol_ forms of the vars, for example.
+
+The `+` function's meta information carries the doc and the inline versions, as seen below.
+#+begin_src clojure :exports both
 (def core-vars
  (->> 'clojure.core
   dir-fn
   (map (comp meta resolve))))
 
-(filter (fn [v] (= 'Inst (:name v))) core-vars)
+(filter (fn [v] (= '+' (:name v))) core-vars)
 #+END_SRC
+
+#+RESULTS:
+#+begin_src clojure
+({:added "1.0",
+  :ns #namespace[clojure.core],
+  :name +',
+  :file "clojure/core.clj",
+  :inline-arities #function[clojure.core/>1?],
+  :column 1,
+  :line 972,
+  :arglists ([] [x] [x y] [x y & more]),
+  :doc
+  "Returns the sum of nums. (+') returns 0. Supports arbitrary precision.\n  See also: +",
+  :inline #function[clojure.core/nary-inline/fn--5541]})
+
+#+end_src
 
 * insn (asm)
 :PROPERTIES:
