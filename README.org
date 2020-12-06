@@ -183,8 +183,8 @@ Let's list only the macros. This is a _huge_ list, of course.
 
 #+end_src
 
-The _var_s hold meta information, from which we can glean much useful information.
-The _:name_ slot carries the _Symbol_ forms of the vars, for example.
+The /var/s hold meta information, from which we can glean much useful information.
+The :_name_ slot carries the _Symbol_ forms of the vars, for example.
 
 The `+` function's meta information carries the doc and the inline versions, as seen below.
 #+begin_src clojure :exports both
@@ -214,10 +214,10 @@ The `+` function's meta information carries the doc and the inline versions, as 
 
 * insn (asm)
 :PROPERTIES:
-:header-args: :tangle src/clojurexplore/asm.clj
+:header-args: :tangle src/clojurexplore/asm.clj :results output code
 :END:
 
-#+BEGIN_SRC clojure
+#+BEGIN_SRC clojure :exports both
 (ns clojurexplore.asm
   (:require [insn.core :as insn]
             [insn.clojure :as ic]
@@ -256,25 +256,66 @@ The `+` function's meta information carries the doc and the inline versions, as 
 (def Adder (insn/define adder-class-data))
 
 (def empty-class-array (make-array Class 0))
+#+end_src
 
-;; We can now instantiate
+We can now instantiate the class created above. It's in-memory only.
+
+#+begin_src clojure :exports both
+
 ;; Way 1
 (-> Adder
   (.getDeclaredConstructor empty-class-array)
   (.newInstance empty-class-array)
   (.add 10))
+#+end_src
 
+#+RESULTS:
+#+begin_src clojure
+52
+
+#+end_src
+
+We can use the class data directly using insn's builtin function
+#+begin_src clojure :exports both
 ;; Way 2
-;; We can use the class data directly
-(.add (insn/new-instance adder-class-data) 10)
 
+(.add (insn/new-instance adder-class-data) 10)
+#+end_src
+
+#+RESULTS:
+#+begin_src clojure
+52
+
+#+end_src
+
+Notice, we use the FQCN - 'Adder' the var isn't the same as the FQCN
+#+begin_src clojure :exports both
 ;; Or, way 3
-;; Notice, we use the FQCN - 'Adder' the var isn't the same as the FQCN
+
 (.add (clojurexplore.asm.Adder.) 10)
 ;; (.add (Adder.) 10) - Adder will not be resolvable
+#+end_src
 
-(clojurexplore.asm.Adder/addStatic 10)
+#+RESULTS:
+#+begin_src clojure
+52
 
+#+end_src
+
+
+Calling the static function is the usual too
+#+begin_src clojure :exports both
+(clojurexplore.asm.Adder/addStatic 100)
+#+end_src
+
+#+RESULTS:
+#+begin_src clojure
+142
+
+#+end_src
+
+/insn/ also provides a version of /fn/ that allows for creating a function body using ASM instructions.
+#+begin_src clojure :exports both
 ;; Clojure function, with body defined in Java assembly language
 (def ^{:arglists '(^long [^long x])}
   incr (ic/fn ^long [^long x]
@@ -284,7 +325,17 @@ The `+` function's meta information carries the doc and the inline versions, as 
           [:lreturn]]))
 
 (incr 10)
+#+end_src
 
+#+RESULTS:
+#+begin_src clojure
+11
+
+#+end_src
+
+
+Some more advanced usage - using ConstantDynamic
+#+begin_src clojure :exports both
 ;; A more complex example
 (let [class-name (str "clojurexplore.asm." (gensym "cd"))
       desc [MethodHandles$Lookup String Class Object Object]
@@ -292,7 +343,7 @@ The `+` function's meta information carries the doc and the inline versions, as 
               (util/constant-dynamic (str "foo-" x) :long
                 [:invokestatic class-name "bsm" desc] [x]))]
   (def foo {:version 11
-            :name class-name                                ;; ConstantDynamic
+            :name class-name
             :fields []
             :methods [{:flags #{:public :static}
                        :name "bsm"
@@ -310,11 +361,41 @@ The `+` function's meta information carries the doc and the inline versions, as 
                        :emit [[:ldc (const 42)]
                               [:ldc (const 17)]
                               [:ladd]
+                              [:lreturn]]}
+
+                      {:name "go"
+                       :desc [:int :int :long]
+                       :emit [[:iload 1]
+                              [:iload 2]
+                              [:iadd]
+                              [:i2l]
                               [:lreturn]]}]}))
 
 (def foo-instance (insn/new-instance foo))
+#+end_src
+
+We have now two overloaded version of the method /go/.
+The first one takes no arguments and adds two hard-coded constants
+#+begin_src clojure :exports both
 (.go foo-instance)
+#+end_src
+
+#+RESULTS:
+#+begin_src clojure
+61
+
+#+end_src
+
+The next one takes two arguments and adds.
+#+begin_src clojure :exports both
+(.go foo-instance 23 45)
 #+END_SRC
+
+#+RESULTS:
+#+begin_src clojure
+68
+
+#+end_src
 
 * classpath
 :PROPERTIES:
