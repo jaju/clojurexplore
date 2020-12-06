@@ -1,0 +1,364 @@
+#+title:     Exploring Clojure
+#+author:    Ravindra R. Jaju
+
+These are random explorations of core Clojure - both in itself as well as from Java's perspective.
+
+* clojure.core
+:PROPERTIES:
+:header-args: :tangle src/clojurexplore/ccore.clj :results output code
+:END:
+
+#+BEGIN_SRC clojure
+(ns clojurexplore.ccore
+  (:require [clojure.repl :refer [dir dir-fn doc]]))
+;; The name ccore stands for exploring clojure core
+#+end_src
+
+#+RESULTS:
+#+begin_src clojure
+
+
+#+end_src
+
+#+begin_src clojure :exports both
+*clojure-version*
+#+end_src
+
+#+RESULTS:
+#+begin_src clojure
+{:major 1, :minor 10, :incremental 1, :qualifier }
+
+#+end_src
+
+#+begin_src clojure
+;; clojure.core is HUGE.
+(count (dir-fn 'clojure.core))
+#+end_src
+
+#+RESULTS:
+#+begin_src clojure
+659
+
+#+end_src
+
+Protocols present themselves as a map when printed
+
+#+begin_src clojure
+;; Protocols. Picking one arbitrarily
+Inst
+#+end_src
+
+#+RESULTS:
+#+begin_src clojure
+{:on clojure.core.Inst,
+ :on-interface clojure.core.Inst,
+ :sigs {:inst-ms* {:name inst-ms*, :arglists ([inst]), :doc }},
+ :var #'clojure.core/Inst,
+ :method-map {:inst-ms* :inst-ms*},
+ :method-builders
+ {#'clojure.core/inst-ms* #function[clojure.core/fn--8399]},
+ :impls
+ {java.util.Date {:inst-ms* #function[clojure.core/fn--8410]},
+  java.time.Instant {:inst-ms* #function[clojure.core/fn--8414]}}}
+
+#+end_src
+
+How many public vars start with "with-"?
+#+begin_src clojure
+;; What with-* functions exist? 10+!
+(->> 'clojure.core
+  dir-fn
+  (map name)
+  (filter #(.startsWith % "with-")))
+#+end_src
+
+#+RESULTS:
+#+begin_src clojure
+("with-bindings"
+ "with-bindings*"
+ "with-in-str"
+ "with-loading-context"
+ "with-local-vars"
+ "with-meta"
+ "with-open"
+ "with-out-str"
+ "with-precision"
+ "with-redefs"
+ "with-redefs-fn")
+
+#+end_src
+
+Let's list only the macros
+#+begin_src clojure
+;; List the macros
+(->> 'clojure.core
+  dir-fn
+  (map (comp meta resolve))
+  (filter :macro)
+  (map :name))
+#+end_src
+
+#+RESULTS:
+#+begin_src clojure
+(->
+ ->>
+ ..
+ amap
+ and
+ areduce
+ as->
+ assert
+ binding
+ bound-fn
+ case
+ comment
+ cond
+ cond->
+ cond->>
+ condp
+ declare
+ definline
+ definterface
+ defmacro
+ defmethod
+ defmulti
+ defn
+ defn-
+ defonce
+ defprotocol
+ defrecord
+ defstruct
+ deftype
+ delay
+ doseq
+ dosync
+ dotimes
+ doto
+ extend-protocol
+ extend-type
+ fn
+ for
+ future
+ gen-class
+ gen-interface
+ if-let
+ if-not
+ if-some
+ import
+ io!
+ lazy-cat
+ lazy-seq
+ let
+ letfn
+ locking
+ loop
+ memfn
+ ns
+ or
+ proxy
+ proxy-super
+ pvalues
+ refer-clojure
+ reify
+ some->
+ some->>
+ sync
+ time
+ vswap!
+ when
+ when-first
+ when-let
+ when-not
+ when-some
+ while
+ with-bindings
+ with-in-str
+ with-loading-context
+ with-local-vars
+ with-open
+ with-out-str
+ with-precision
+ with-redefs)
+
+#+end_src
+
+#+begin_src clojure
+(def core-vars
+ (->> 'clojure.core
+  dir-fn
+  (map (comp meta resolve))))
+
+(filter (fn [v] (= 'Inst (:name v))) core-vars)
+#+END_SRC
+
+* insn (asm)
+:PROPERTIES:
+:header-args: :tangle src/clojurexplore/asm.clj
+:END:
+
+#+BEGIN_SRC clojure
+(ns clojurexplore.asm
+  (:require [insn.core :as insn]
+            [insn.clojure :as ic]
+            [insn.op :as op]
+            [insn.util :as util]
+            [insn.core :as core])
+  (:import [java.lang.invoke MethodHandles MethodHandles$Lookup]))
+
+;; This namespace is mostly copied from insn's samples
+
+(def adder-class-data
+  {:name 'clojurexplore.asm.Adder
+   :fields [{:flags #{:public :static} :name "VALUE" :type :int :value 42}]
+   :methods [
+             ;; An instance method
+             {:flags #{:public}
+              :name "add"
+              :desc [:int :long]
+              :emit [[:getstatic :this "VALUE" :int]
+                     [:iload 1]                             ;; 'this' is 0. Argument at 1.
+                     [:iadd]
+                     [:i2l]
+                     [:lreturn]]}
+
+             ;; A static method
+             {:flags #{:public :static}
+              :name "addStatic"
+              :desc [:int :long]
+              :emit [[:getstatic :this "VALUE" :int]
+                     [:iload 0]                             ;; No 'this' at 0. Argument at 0.
+                     [:iadd]
+                     [:i2l]
+                     [:lreturn]]}]})
+
+
+(def Adder (insn/define adder-class-data))
+
+(def empty-class-array (make-array Class 0))
+
+;; We can now instantiate
+;; Way 1
+(-> Adder
+  (.getDeclaredConstructor empty-class-array)
+  (.newInstance empty-class-array)
+  (.add 10))
+
+;; Way 2
+;; We can use the class data directly
+(.add (insn/new-instance adder-class-data) 10)
+
+;; Or, way 3
+;; Notice, we use the FQCN - 'Adder' the var isn't the same as the FQCN
+(.add (clojurexplore.asm.Adder.) 10)
+;; (.add (Adder.) 10) - Adder will not be resolvable
+
+(clojurexplore.asm.Adder/addStatic 10)
+
+;; Clojure function, with body defined in Java assembly language
+(def ^{:arglists '(^long [^long x])}
+  incr (ic/fn ^long [^long x]
+         [[:lload 1]
+          [:ldc2 1]
+          [:ladd]
+          [:lreturn]]))
+
+(incr 10)
+
+;; A more complex example
+(let [class-name (str "clojurexplore.asm." (gensym "cd"))
+      desc [MethodHandles$Lookup String Class Object Object]
+      const (fn [x]
+              (util/constant-dynamic (str "foo-" x) :long
+                [:invokestatic class-name "bsm" desc] [x]))]
+  (def foo {:version 11
+            :name class-name                                ;; ConstantDynamic
+            :fields []
+            :methods [{:flags #{:public :static}
+                       :name "bsm"
+                       :desc desc
+                       :emit [[:aload 3]
+                              [:checkcast Long]
+                              [:invokevirtual Long "longValue" [:long]]
+                              [:ldc2 1]
+                              [:ladd]
+                              [:invokestatic Long "valueOf" [:long Long]]
+                              [:areturn]]}
+
+                      {:name "go"
+                       :desc [:long]
+                       :emit [[:ldc (const 42)]
+                              [:ldc (const 17)]
+                              [:ladd]
+                              [:lreturn]]}]}))
+
+(def foo-instance (insn/new-instance foo))
+(.go foo-instance)
+#+END_SRC
+
+* classpath
+:PROPERTIES:
+:header-args: :tangle src/clojurexplore/classpath.clj
+:END:
+#+begin_src clojure
+(ns clojurexplore.classpath
+  (:require [clojure.repl :refer [dir doc]]
+            [clojure.java.classpath :as cp])
+  (:import [java.util.jar JarFile]
+           [java.io File]))
+
+;; List all public vars in the cp namespace
+(dir cp)
+
+;; The java.io.File objects of the classpath of this process
+(cp/classpath)
+
+;; We'll arbitrarily pick the first one and do a bean-inspect
+(bean (first (cp/classpath)))
+
+;; And the last one
+(bean (last (cp/classpath)))
+
+;; The classpath files which are directories
+(cp/classpath-directories)
+
+;; List all the JARs in the classpath
+(def cp-jar-files (filter cp/jar-file? (cp/classpath)))
+
+;; List all files in a jarfile
+(cp/filenames-in-jar
+  (JarFile. ^File (-> cp-jar-files first bean :canonicalFile)))
+#+end_src
+
+* java.data
+:PROPERTIES:
+:header-args: :tangle src/clojurexplore/java_data.clj
+:END:
+
+#+begin_src clojure
+(ns clojurexplore.java-data
+  (:require [clojure.repl :refer [dir dir-fn]]
+            [clojure.java.data :refer :all]))
+
+;; dir - a function to *print* public vars in an ns (returns nil)
+;; dir-fn - returns a seq of public vars in an ns - used internally by dir
+
+;; clojure.java.data - A smallish namespace for java-clojure transformations
+(dir clojure.java.data)
+(dir-fn 'clojure.java.data)
+
+(-> (Thread.) to-java)
+(bean (Thread. "Hello"))
+
+(bean "hello")
+(->> (Thread/currentThread)
+  bean
+  :contextClassLoader
+  bean
+  ;;:parent
+  ;;bean
+  ;;:parent
+  ;;bean
+  ;;:URLs
+  ;;bean
+  )
+#+end_src
