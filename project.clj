@@ -10,12 +10,12 @@
             :comments ""}
 
   :dependencies [
-                 [org.clojure/clojure "1.10.1"]
-                 [insn "0.5.0"]
-                 [nrepl/nrepl "0.8.3"]
+                 [org.clojure/clojure "1.11.1"]
+                 [insn "0.5.2"]
+                 [nrepl/nrepl "0.9.0"]
                  [org.clojure/java.jmx "1.0.0"]
-                 [org.clojure/java.data "1.0.86"]
+                 [org.clojure/java.data "1.0.95"]
                  [org.clojure/java.classpath "1.0.0"]
-                 [cheshire/cheshire "5.10.0"]
+                 [cheshire/cheshire "5.10.2"]
                  ]
   )
