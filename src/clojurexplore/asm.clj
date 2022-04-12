@@ -7,7 +7,6 @@
   (:import [java.lang.invoke MethodHandles MethodHandles$Lookup]))
 
 
-
 (def adder-class-data
   {:name 'clojurexplore.asm.Adder
    :fields [{:flags #{:public :static} :name "VALUE" :type :int :value 42}]

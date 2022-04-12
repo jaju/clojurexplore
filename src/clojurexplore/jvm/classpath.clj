@@ -1,4 +1,4 @@
-(ns clojurexplore.classpath
+(ns clojurexplore.jvm.classpath
   (:require [clojure.repl :refer [dir doc]]
             [clojure.java.classpath :as cp])
   (:import [java.util.jar JarFile]
