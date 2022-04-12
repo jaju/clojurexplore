@@ -1,0 +1,24 @@
+{
+ :paths ["src"]
+
+ :deps {
+        org.clojure/clojure {:mvn/version "1.11.1"}
+        insn/insn {:mvn/version "0.5.2"}
+        org.clojure/java.jmx {:mvn/version "1.0.0"}
+        org.clojure/java.data {:mvn/version "1.0.95"}
+        org.clojure/java.classpath {:mvn/version "1.0.0"}
+        cheshire/cheshire {:mvn/version "5.10.2"}
+        }
+
+ :aliases {
+           :dev {
+                 :extra-deps {
+                              nrepl/nrepl {:mvn/version "0.9.0"}
+                              viebel/klipse-repl {:mvn/version "0.2.3"}
+                              }
+                 :exec-fn nrepl.server/start-server
+                 :exec-args {}
+                 :main-opts ["-m" "klipse-repl.main"]
+                 }
+           }
+ }
