@@ -1,26 +1,20 @@
 #+title:     Exploring Clojure
 #+author:    Ravindra R. Jaju
-
+#+BABEL: :session *clojure-nrepl* :cache yes :results output :exports code :tangle yes
 These are random explorations of core Clojure - both in itself as well as from Java's perspective.
 
 * clojure.core
 :PROPERTIES:
-:header-args: :tangle src/clojurexplore/ccore.clj :results output code
+:header-args: :tangle src/clojurexplore/ccore.clj
 :END:
 
-#+BEGIN_SRC clojure
+#+BEGIN_SRC clojure :exports none :results none
 (ns clojurexplore.ccore
   (:require [clojure.repl :refer [dir dir-fn doc]]))
 ;; The name ccore stands for exploring clojure core
 #+end_src
 
-#+RESULTS:
-#+begin_src clojure
-
-
-#+end_src
-
-#+begin_src clojure :exports both
+#+begin_src clojure :results output code :tangle no :exports none
 *clojure-version*
 #+end_src
 
@@ -30,15 +24,9 @@ These are random explorations of core Clojure - both in itself as well as from J
 
 #+end_src
 
-#+begin_src clojure :exports both
+#+begin_src clojure :exports none
 ;; clojure.core is HUGE.
 (count (dir-fn 'clojure.core))
-#+end_src
-
-#+RESULTS:
-#+begin_src clojure
-659
-
 #+end_src
 
 Protocols present themselves as a map when printed. It's easy to see its implementations in the `:impls` slot.

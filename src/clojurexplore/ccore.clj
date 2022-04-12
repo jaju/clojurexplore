@@ -1,19 +1,13 @@
-(clojure.pprint/pprint (do (ns clojurexplore.ccore
-  (:require [clojure.repl :refer [dir dir-fn doc]]))))
+(ns clojurexplore.ccore
+  (:require [clojure.repl :refer [dir dir-fn doc]]))
 
-(clojure.pprint/pprint (do ))
+{:major 1, :minor 10, :incremental 1, :qualifier }
 
-(clojure.pprint/pprint (do *clojure-version*))
+(count (dir-fn 'clojure.core))
 
-(clojure.pprint/pprint (do {:major 1, :minor 10, :incremental 1, :qualifier }))
+Inst
 
-(clojure.pprint/pprint (do (count (dir-fn 'clojure.core))))
-
-(clojure.pprint/pprint (do 659))
-
-(clojure.pprint/pprint (do Inst))
-
-(clojure.pprint/pprint (do {:on clojure.core.Inst,
+{:on clojure.core.Inst,
  :on-interface clojure.core.Inst,
  :sigs {:inst-ms* {:name inst-ms*, :arglists ([inst]), :doc }},
  :var #'clojure.core/Inst,
@@ -22,14 +16,14 @@
  {#'clojure.core/inst-ms* #function[clojure.core/fn--8399]},
  :impls
  {java.util.Date {:inst-ms* #function[clojure.core/fn--8410]},
-  java.time.Instant {:inst-ms* #function[clojure.core/fn--8414]}}}))
+  java.time.Instant {:inst-ms* #function[clojure.core/fn--8414]}}}
 
-(clojure.pprint/pprint (do (->> 'clojure.core
+(->> 'clojure.core
   dir-fn
   (map name)
-  (filter #(.startsWith % "with-")))))
+  (filter #(.startsWith % "with-")))
 
-(clojure.pprint/pprint (do ("with-bindings"
+("with-bindings"
  "with-bindings*"
  "with-in-str"
  "with-loading-context"
@@ -39,15 +33,15 @@
  "with-out-str"
  "with-precision"
  "with-redefs"
- "with-redefs-fn")))
+ "with-redefs-fn")
 
-(clojure.pprint/pprint (do (->> 'clojure.core
+(->> 'clojure.core
   dir-fn
   (map (comp meta resolve))
   (filter :macro)
-  (map :name))))
+  (map :name))
 
-(clojure.pprint/pprint (do (->
+(->
  ->>
  ..
  amap
@@ -125,11 +119,23 @@
  with-open
  with-out-str
  with-precision
- with-redefs)))
+ with-redefs)
 
-(clojure.pprint/pprint (do (def core-vars
+(def core-vars
  (->> 'clojure.core
   dir-fn
   (map (comp meta resolve))))
 
-(filter (fn [v] (= 'Inst (:name v))) core-vars)))
+(filter (fn [v] (= '+' (:name v))) core-vars)
+
+({:added "1.0",
+  :ns #namespace[clojure.core],
+  :name +',
+  :file "clojure/core.clj",
+  :inline-arities #function[clojure.core/>1?],
+  :column 1,
+  :line 972,
+  :arglists ([] [x] [x y] [x y & more]),
+  :doc
+  "Returns the sum of nums. (+') returns 0. Supports arbitrary precision.\n  See also: +",
+  :inline #function[clojure.core/nary-inline/fn--5541]})
