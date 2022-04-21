@@ -5,6 +5,7 @@
 
 (count (dir-fn 'clojure.core))
 
+
 Inst
 
 (->> 'clojure.core
@@ -12,7 +13,7 @@ Inst
   (map name)
   (filter #(.startsWith % "with-")))
 
-("with-bindings"
+'("with-bindings"
  "with-bindings*"
  "with-in-str"
  "with-loading-context"
@@ -36,3 +37,5 @@ Inst
   (map (comp meta resolve))))
 
 (filter (fn [v] (= '+' (:name v))) core-vars)
+
+(println "Hello")

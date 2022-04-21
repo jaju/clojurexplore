@@ -1,8 +1,8 @@
 (ns clojurexplore.basics.functions)
 
 ;; Functions
-(fn [x y]
-  (+ x y))
+((fn [x y]
+   (+ x y)) 10 20)
 
 
 ;; The above was an anonymous function. We need def
@@ -12,8 +12,8 @@
 
 
 ;; The above works, but is tedious. So, we have
-(defn add-v2 [arg1 arg2]
-  (+ arg1 arg2))
+(defn add-v2 [x y]
+  (+ x y))
 (add-v2 1 2)
 
 
@@ -23,6 +23,17 @@
   ([x] x)
   ([x y] (+ x y)))
 
+;; vector [1 2 3 4]
+
+(defn fib-next [[a b]]
+  (vector b (+' a b)))
+
+(last (map first (take 1000 (iterate fib-next [0 1]))))
+(->> [0 1]
+     (iterate fib-next)
+     (take 1000)
+     (map first)
+     last)
 
 ;; vararg
 
@@ -33,8 +44,8 @@
     (def answer (+ answer v)))
   answer)
 
-;; Keep intermediate state - v1
-(defn add-all-v1 [& vs]
+;; def is not the answer! So, a local scope
+(defn add-all-v2 [& vs]
   (let [answer (atom 0)]
     (doseq [v vs]
       (swap! answer + v))
