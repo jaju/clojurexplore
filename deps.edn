@@ -3,7 +3,7 @@
 
  :deps {
         org.clojure/clojure {:mvn/version "1.11.1"}
-        insn/insn {:mvn/version "0.5.2"}
+        insn/insn {:mvn/version "0.5.4"}
         org.clojure/java.jmx {:mvn/version "1.0.0"}
         org.clojure/java.data {:mvn/version "1.0.95"}
         org.clojure/java.classpath {:mvn/version "1.0.0"}

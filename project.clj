@@ -11,7 +11,7 @@
 
   :dependencies [
                  [org.clojure/clojure "1.11.1"]
-                 [insn "0.5.2"]
+                 [insn "0.5.4"]
                  [nrepl/nrepl "0.9.0"]
                  [org.clojure/java.jmx "1.0.0"]
                  [org.clojure/java.data "1.0.95"]
