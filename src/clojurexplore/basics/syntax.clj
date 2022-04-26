@@ -30,6 +30,7 @@ string"
 :a/b
 ::hello-clojure
 
+
 ;; Symbols.
 'a
 (quote a)
@@ -40,15 +41,17 @@ string"
 ;; Lists.
 ;; Since we use parens, quoting prevents the first member from being treated as a
 ;; function, and the form from being evaluated
+'(+ 1 2 3 4)
 '(1 2 3)
 '(1 :b :c 10 (9 0 (:foo :bar)))
 '(a b c)
 (list 1 2 3)
 
+
 ;; Vectors
 []
 [1 2 3 4 5 '(6 7)]
-'[1 2 [3 4] (5 6)]
+[1 2 [3 4] (5 6)]
 (vector 1 2 3)
 (vec (range 10))
 ;; Not very pleasing, but notice vec vs vector.
@@ -138,7 +141,7 @@ i-am-inside-a-for
 ;; Local variables - scope controlled
 
 (let [a 10
-      b b]
+      b 20]
   ;; The above vector form has an even number of elements, and is called a binding
   ;; Binds symbols to values and these symbols are only available within the
   ;; let block

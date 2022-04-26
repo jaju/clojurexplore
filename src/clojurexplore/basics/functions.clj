@@ -1,9 +1,12 @@
-(ns clojurexplore.basics.functions)
+(ns clojurexplore.basics.functions
+  (:import (clojure.lang IFn)))
 
 ;; Functions
+(fn [x y]
+  (+ x y))
+
 ((fn [x y]
    (+ x y)) 10 20)
-
 
 ;; The above was an anonymous function. We need def
 (def add (fn [x y]
@@ -25,59 +28,11 @@
 
 ;; vector [1 2 3 4]
 
-(defn fib-next [[a b]]
-  (vector b (+' a b)))
-
-(last (map first (take 1000 (iterate fib-next [0 1]))))
-(->> [0 1]
-     (iterate fib-next)
-     (take 1000)
-     (map first)
-     last)
-
 ;; vararg
 
-;; Keep intermediate state - v1
-(defn add-all-v1 [& vs]
-  (def answer 0)
-  (doseq [v vs]
-    (def answer (+ answer v)))
-  answer)
-
-;; def is not the answer! So, a local scope
-(defn add-all-v2 [& vs]
-  (let [answer (atom 0)]
-    (doseq [v vs]
-      (swap! answer + v))
-    @answer))
-
-;; Ugh - atom, really?
-
-(defn add-all-v3 [& vs]
-  (loop [answer 0
-         remaining vs]
-    (if remaining
-      (recur (+ answer (first remaining)) (next remaining))
-      answer)))
-
-;; Umm?
-
-(defn add-all-v4
-  ([] 0)
-  ([v & vs] (+ v (apply add-all-v4 vs))))
-
-;; Oh, finally are we applying ourselves?
-
-(defn add-all-v5
-  ([] 0)
-  ([x] x)
-  ([x y] (+ x y))
-  ([x y & more] (apply add-all (+ x y) more)))
-
-;; Like the above, but slightly more efficient for a few cases. Why?
-
-(defn add-all-v6 [& vs]
+(defn add-varargs [& vs]
   (reduce + vs))
+(add-varargs 1 2 3 4)
 
 ;; Pre- and post-conditions on the arguments and return values
 (defn divide [n d]
